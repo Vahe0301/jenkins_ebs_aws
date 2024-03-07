@@ -14,9 +14,9 @@ pipeline {
         stage('Chechkout SCM') {
             steps {
                 script {
-                    git branch: 'main' ,
-                        credentialId: 'github_key' ,
-                        url: 'git@github.com:Vahe0301/jenkins_ebs_aws.git'
+                    git branch:'main',
+                        credentialId:'github_key',
+                        url:'git@github.com:Vahe0301/jenkins_ebs_aws.git'
                 }
 
             }
