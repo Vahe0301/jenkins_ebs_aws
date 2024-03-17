@@ -4,8 +4,8 @@ pipeline {
     }
     agent any
     environment {
-        AWS_REGION = 'eu-west-3'  // Set your AWS region
-        AWS_ACCOUNT_ID = "908177614064"
+        AWS_REGION = 'us-west-2'  // Set your AWS region
+        AWS_ACCOUNT_ID = "263378412066"
         AWS_EB_ENV_NAME = 'Jenkins-test-env'  // Set your Elastic Beanstalk environment name
     }
     stages {
@@ -14,7 +14,7 @@ pipeline {
                 script {
                     git branch: 'main',
                         credentialsId: 'github_key',
-                        url: 'git@github.com:bagrat92/jenkins-from-aws.git'
+                        url: 'git@github.com:Vahe0301/jenkins_ebs_aws.git'
                 }
             }
 
