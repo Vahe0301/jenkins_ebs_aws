@@ -2,51 +2,64 @@ pipeline {
     options {
         buildDiscarder(logRotator(numToKeepStr: '5'))
     }
-
     agent any
     environment {
-        AWS_REGION = 'us-west-2'
-        AWS_ACCOUNT_ID = "263378412066"
-        AWS_EB_ENV_NAME = "Jenkinstest-env"
-        
+        AWS_REGION = 'eu-west-3'  // Set your AWS region
+        AWS_ACCOUNT_ID = "908177614064"
+        AWS_EB_ENV_NAME = 'Jenkins-test-env'  // Set your Elastic Beanstalk environment name
     }
     stages {
-        stage('Chechkout SCM') {
-            steps {
+        stage('Checkout SCM') {
+            steps { 
                 script {
-                    git branch:'main',
-                        credentialId:'github_key',
-                        url:'git@github.com:Vahe0301/jenkins_ebs_aws.git'
+                    git branch: 'main',
+                        credentialsId: 'github_key',
+                        url: 'git@github.com:bagrat92/jenkins-from-aws.git'
                 }
-
             }
-        }
 
+        }
+        // stage('Assume Role') {
+        //     steps {
+        //         script {
+        //             // Assume an AWS IAM role for this pipeline
+        //             def assumedRole = awsRoleAssumer(
+        //                 credentials: 'aws_eb_access',
+        //                 roleArn: 'arn:aws:iam::908177614064:role/aws_eb_roles_for_jenkins'
+        //             )
+        //         }
+        //     }
+        // }
         stage('Zip Application Code') {
             steps {
-                sh 'zip -r my-app.zip .'
+                // Zip your application code
+                sh "zip -r my-app.zip ."
             }
         }
-        stage ('Upload to S3') {
+        stage('Upload to S3') {
             steps {
-                withCredentials([usernamePassword(credentialsID: 'aws_ebs_key' , accessKeyVariable: "AKIAT2UUTUIRC2FV4AKT" , secretKeyVariable: "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")]) {
-                    sh 'aws s3 cp my-app.zip s3:/elasticbeanstalk-us-west-2-263378412066/'
+                // Upload the zipped code to an S3 bucket
+                withCredentials([usernamePassword(credentialsId: 'aws_key', accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh 'aws s3 cp my-app.zip s3:/elasticbeanstalk-eu-west-3-908177614064/'
                 }
             }
         }
         stage('Deploy to Elastic Beanstalk') {
             steps {
                 script {
-                    withAWS (credentials: 'aws_ebs_key' , region: env.AWS_RGION) {
+                    withAWS(credentials: 'aws_key', region: env.AWS_REGION) {
                         sh '''
-                        aws elasticbeanstalk create-application-version --application-name jenkins_test \
-                        --version-label Jenkins-${BUILD_ID} --source-bundle S3Bucket=elasticbeanstalk-us-west-2-263378412066,S3Key=my-app.zip
-                        
-                        aws elasticbeanstalk update-environment --environment-name $AWS_EB_ENV_NAME --version-label Jenkins-${BUILD_ID}
+                            aws elasticbeanstalk create-application-version --application-name jenkins-test \
+                            --version-label Jenkins-${BUILD_ID} --source-bundle S3Bucket=elasticbeanstalk-eu-west-3-908177614064,S3Key=my-app.zip
+
+                            aws elasticbeanstalk update-environment --environment-name $AWS_EB_ENV_NAME --version-label Jenkins-${BUILD_ID}
                         '''
                     }
                 }
             }
+        }
+    }
+}
         }
     }
     }
