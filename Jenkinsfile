@@ -29,7 +29,6 @@ pipeline {
         //             )
         //         }
         //     }
-        // }
         stage('Zip Application Code') {
             steps {
                 // Zip your application code
