@@ -39,8 +39,8 @@ pipeline {
         stage('Upload to S3') {
             steps {
                 // Upload the zipped code to an S3 bucket
-                withCredentials([usernamePassword(credentialsId: 'aws_key', accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
-                    sh 'aws s3 cp my-app.zip s3:/elasticbeanstalk-eu-west-3-908177614064/'
+                withCredentials([usernamePassword(credentialsId: 'aws_ebs_key', accessKeyVariable: 'AWS_ACCESS_KEY', secretKeyVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                    sh 'aws s3 cp my-app.zip s3:/elasticbeanstalk-us-west-2-263378412066/'
                 }
             }
         }
@@ -50,7 +50,7 @@ pipeline {
                     withAWS(credentials: 'aws_key', region: env.AWS_REGION) {
                         sh '''
                             aws elasticbeanstalk create-application-version --application-name jenkins-test \
-                            --version-label Jenkins-${BUILD_ID} --source-bundle S3Bucket=elasticbeanstalk-eu-west-3-908177614064,S3Key=my-app.zip
+                            --version-label Jenkins-${BUILD_ID} --source-bundle S3Bucket=elasticbeanstalk-us-west-2-263378412066,S3Key=my-app.zip
 
                             aws elasticbeanstalk update-environment --environment-name $AWS_EB_ENV_NAME --version-label Jenkins-${BUILD_ID}
                         '''
@@ -60,6 +60,4 @@ pipeline {
         }
     }
 }
-        }
-    }
-    }
+        
